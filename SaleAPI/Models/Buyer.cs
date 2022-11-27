@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SaleAPI.Models
 {
@@ -13,6 +14,7 @@ namespace SaleAPI.Models
         [Required]
         public string Name { get; set; }
 
-        public List<int> SalesIds { get; set; }
+        [NotMapped]
+        public IEnumerable<int> SalesIds { get; set; }
     }
 }

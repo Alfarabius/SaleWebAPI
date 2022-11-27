@@ -29,7 +29,7 @@ namespace SaleAPI
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDbContext<SaleAPIDataContext>(options => options.UseSqlServer(
-                Configuration["ConnectionStrings:DefaultConnection"]));
+                Configuration.GetConnectionString("DefaultConnection")));
 
             services.AddControllers();
             services.AddSwaggerGen(c =>
