@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace SaleAPI.Models
 {
@@ -11,5 +12,8 @@ namespace SaleAPI.Models
 
         [Required]
         public string Name { get; set; }
+
+        [Required]
+        public List<ProvidedProducts> ProvidedProducts { get; set; }
     }
 }
