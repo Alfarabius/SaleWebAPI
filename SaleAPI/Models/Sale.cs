@@ -8,10 +8,8 @@ namespace SaleAPI.Models
     /// <summary>
     /// Класс <c>Sale</c> – Акт продажи.
     /// </summary>
-    public class Sale
+    public class Sale : EntityModel
     {
-        public int Id { get; set; }
-
         [Required]
         public DateTime Date { get; set; }
 

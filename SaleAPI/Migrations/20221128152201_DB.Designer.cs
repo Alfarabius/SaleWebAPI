@@ -10,8 +10,8 @@ using SaleAPI.DataAccess;
 namespace SaleAPI.Migrations
 {
     [DbContext(typeof(SaleAPIDataContext))]
-    [Migration("20221127185649_Initial")]
-    partial class Initial
+    [Migration("20221128152201_DB")]
+    partial class DB
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {

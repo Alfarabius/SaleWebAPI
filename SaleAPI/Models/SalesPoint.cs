@@ -7,13 +7,8 @@ namespace SaleAPI.Models
     /// <summary>
     /// Класс <c>SalesPoint</c> – точка продажи товаров.
     /// </summary>
-    public class SalesPoint
+    public class SalesPoint : NamedEntityModel
     {
-        public int Id { get; set; }
-
-        [Required]
-        public string Name { get; set; }
-
         [Required, NotMapped]
         public IEnumerable<ProvidedProducts> ProvidedProducts { get; set; }
     }
