@@ -8,16 +8,15 @@ using System.Threading.Tasks;
 
 namespace SaleAPI.Controllers
 {
-    [ApiExplorerSettings(IgnoreApi = true)]
+    [Route("SaleAPI/[controller]")]
+    [ApiController]
     public abstract class BaseApiController<TEntity> : Controller where TEntity : class
     {
         protected abstract DbSet<TEntity> DbTable { get; }
 
-        protected abstract IQueryable<TEntity> QueryTable { get; }
-
         protected abstract string Name { get; }
 
-        private readonly SaleAPIDataContext context;
+        protected SaleAPIDataContext context { get; }
 
         public BaseApiController(SaleAPIDataContext context)
         {
@@ -43,7 +42,7 @@ namespace SaleAPI.Controllers
         [Route("List")]
         public IActionResult GetDbTable([FromQuery] int number)
         {
-            var list = this.QueryTable.Take(number);
+            var list = this.DbTable.Take(number);
             return Ok(list);
         }
 
@@ -65,7 +64,7 @@ namespace SaleAPI.Controllers
 
             if (Entity == null)
             {
-                return BadRequest($"Entity {id} doesn't exist");
+                return BadRequest($"{Name} {id} doesn't exist");
             }
 
             DbTable.Remove(Entity);
@@ -82,7 +81,7 @@ namespace SaleAPI.Controllers
 
             if (oldEntity == null)
             {
-                return BadRequest($"Entity {id} doesn't exist");
+                return BadRequest($"{Name} {id} doesn't exist");
             }
 
             DbTable.Update(Entity);
@@ -90,6 +89,7 @@ namespace SaleAPI.Controllers
             return Ok(Entity);
         }
 
+        [ApiExplorerSettings(IgnoreApi = true)]
         public abstract TEntity EntityById(int id);
     }
 }
