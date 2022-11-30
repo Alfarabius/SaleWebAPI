@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace SaleAPI.Migrations
 {
-    public partial class initial : Migration
+    public partial class Initial : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -63,21 +63,78 @@ namespace SaleAPI.Migrations
                 {
                     table.PrimaryKey("PK_SalesPoints", x => x.Id);
                 });
+
+            migrationBuilder.CreateTable(
+                name: "SaleId",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    SalesIds = table.Column<int>(type: "int", nullable: false),
+                    BuyerId = table.Column<int>(type: "int", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_SaleId", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_SaleId_Buyers_BuyerId",
+                        column: x => x.BuyerId,
+                        principalTable: "Buyers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ProvidedProduct",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    ProductId = table.Column<int>(type: "int", nullable: false),
+                    ProductQuantity = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    SalesPointId = table.Column<int>(type: "int", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ProvidedProduct", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ProvidedProduct_SalesPoints_SalesPointId",
+                        column: x => x.SalesPointId,
+                        principalTable: "SalesPoints",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ProvidedProduct_SalesPointId",
+                table: "ProvidedProduct",
+                column: "SalesPointId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_SaleId_BuyerId",
+                table: "SaleId",
+                column: "BuyerId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Buyers");
+                name: "Products");
 
             migrationBuilder.DropTable(
-                name: "Products");
+                name: "ProvidedProduct");
+
+            migrationBuilder.DropTable(
+                name: "SaleId");
 
             migrationBuilder.DropTable(
                 name: "Sales");
 
             migrationBuilder.DropTable(
                 name: "SalesPoints");
+
+            migrationBuilder.DropTable(
+                name: "Buyers");
         }
     }
 }
