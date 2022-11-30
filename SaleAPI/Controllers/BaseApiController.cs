@@ -10,6 +10,7 @@ namespace SaleAPI.Controllers
 {
     [Route("SaleAPI/[controller]")]
     [ApiController]
+    [Authorize]
     public abstract class BaseApiController<TEntity> : Controller where TEntity : class
     {
         protected abstract DbSet<TEntity> DbTable { get; }
@@ -24,7 +25,7 @@ namespace SaleAPI.Controllers
         }
 
         [HttpGet]
-        [Route("GetBy/{id}")]
+        [Route("GetBy{id}")]
         public IActionResult GetEntityById(int id)
         {
 
@@ -39,7 +40,7 @@ namespace SaleAPI.Controllers
         }
 
         [HttpGet]
-        [Route("List")]
+        [Route("GetList")]
         public IActionResult GetDbTable([FromQuery] int number)
         {
             var list = this.DbTable.Take(number);
@@ -55,9 +56,8 @@ namespace SaleAPI.Controllers
             return newEntity;
         }
 
-        [Authorize]
         [HttpDelete]
-        [Route("DeleteBy/{id}")]
+        [Route("DeleteBy{id}")]
         public async Task<IActionResult> DeleteEntityById(int id)
         {
             var Entity = this.EntityById(id);
@@ -74,7 +74,7 @@ namespace SaleAPI.Controllers
         }
 
         [HttpPut]
-        [Route("UpdateBy/{id}")]
+        [Route("UpdateBy{id}")]
         public async Task<IActionResult> UpdateEntityById(int id, [FromBody] TEntity Entity)
         {
             var oldEntity = this.EntityById(id);
