@@ -9,7 +9,12 @@ namespace SaleAPI.Models
     /// </summary>
     public class Buyer : NamedEntityModel
     {
-        [NotMapped]
-        public IEnumerable<int> SalesIds { get; set; }
+        public ICollection<SaleIdE> SalesIds { get; set; }
     }
+
+    public class SaleIdE : EntityModel
+    {
+        [ForeignKey(nameof(Sale))]
+        public int SaleId { get; set; }
+    };
 }

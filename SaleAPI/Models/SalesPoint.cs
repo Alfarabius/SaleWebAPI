@@ -9,7 +9,7 @@ namespace SaleAPI.Models
     /// </summary>
     public class SalesPoint : NamedEntityModel
     {
-        [Required, NotMapped]
-        public IEnumerable<ProvidedProducts> ProvidedProducts { get; set; }
+        [Required]
+        public ICollection<ProvidedProduct> ProvidedProducts { get; set; }
     }
 }

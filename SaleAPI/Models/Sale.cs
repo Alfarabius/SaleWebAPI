@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Diagnostics.CodeAnalysis;
 
 namespace SaleAPI.Models
 {
@@ -19,8 +20,8 @@ namespace SaleAPI.Models
         [Required]
         public int SalesPointId { get; set; }
 
-        [Required]
-        public int BuyerId { get; set; }
+        [Required, AllowNull]
+        public int? BuyerId { get; set; }
 
         [Required, NotMapped]
         public IEnumerable<SalesData> SalesData { get; set; }
