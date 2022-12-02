@@ -1,4 +1,5 @@
 using IdentityServer4.AccessTokenValidation;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -12,6 +13,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using SaleAPI.DataAccess;
+using SaleAPI.Handlers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,23 +32,7 @@ namespace SaleAPI
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
-        {
-
-            services.AddAuthentication(opt =>
-            {
-                opt.DefaultScheme = IdentityServerAuthenticationDefaults.AuthenticationScheme;
-                opt.DefaultChallengeScheme = IdentityServerAuthenticationDefaults.AuthenticationScheme;
-                opt.DefaultAuthenticateScheme = IdentityServerAuthenticationDefaults.AuthenticationScheme;
-            })
-                .AddIdentityServerAuthentication(opt =>
-                {
-                    opt.ApiName = "SaleAPI";
-                    opt.Authority = "https://localhost:10001";
-                    opt.RequireHttpsMetadata = false;
-                });
-
-            services.AddAuthorization();
-            
+        {            
             services.AddDbContext<SaleAPIDataContext>(options => options.UseSqlServer(
                 Configuration.GetConnectionString("DefaultConnection")));
 
@@ -55,17 +41,13 @@ namespace SaleAPI
             {
                 opt.SwaggerDoc("v1", new OpenApiInfo { Title = "SaleAPI", Version = "v1" });
 
-                opt.AddSecurityDefinition("OAuth2", new OpenApiSecurityScheme
+                opt.AddSecurityDefinition("basic", new OpenApiSecurityScheme
                 {
-                    Type = SecuritySchemeType.OAuth2,
-                    Flows = new OpenApiOAuthFlows 
-                    {
-                        Password = new OpenApiOAuthFlow
-                        {
-                            TokenUrl = new Uri("https://localhost:10001/connect/token"),
-                            Scopes = new Dictionary<string, string> { {"SaleAPI", "SaleApi"} }
-                        }
-                    } 
+                    Name = "Authorization",
+                    In = ParameterLocation.Header,
+                    Scheme = "basic",
+                    Type = SecuritySchemeType.Http,
+                    Description = "Basic Authentication"
                 });
 
                 opt.AddSecurityRequirement(new OpenApiSecurityRequirement
@@ -75,14 +57,19 @@ namespace SaleAPI
                         {
                             Reference = new OpenApiReference
                             {
-                                Type=ReferenceType.SecurityScheme,
-                                Id="Bearer"
+                                Type = ReferenceType.SecurityScheme,
+                                Id = "basic"
                             }
                         },
                         new string[]{}
                     }
                 });
             });
+
+            services.AddAuthentication("BasicAuthentication")
+                .AddScheme<AuthenticationSchemeOptions, BasicAuthenticationHandler>("BasicAuthentication", null);
+
+            services.AddAuthorization();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
