@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -9,12 +10,12 @@ namespace SaleAPI.Models
     /// </summary>
     public class Buyer : NamedEntityModel
     {
-        public ICollection<SaleIdE> SalesIds { get; set; }
+        [NotMapped]
+        public ICollection<int> SalesIds { get; set; }
     }
 
-    public class SaleIdE : EntityModel
-    {
-        [ForeignKey(nameof(Sale))]
-        public int SaleId { get; set; }
-    };
+    //public class SaleIdE
+    //{
+    //    public int SaleId { get; set; }
+    //};
 }

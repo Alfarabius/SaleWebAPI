@@ -17,22 +17,40 @@ namespace SaleAPI.DataAccess
 
         public SaleAPIDataContext(DbContextOptions<SaleAPIDataContext> options) : base(options) 
         {
-            Database.EnsureDeleted();
-            Database.Migrate(); // Database-update
+            //Database.EnsureDeleted();
+            //Database.Migrate(); // Database-update
             this.SeedMockDb(this);
+        }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Buyer>().Property(b => b.SalesIds)
+                .HasConversion(
+                s => (string)JsonConvert.SerializeObject(s),
+                s => JsonConvert.DeserializeObject<List<int>>(s));
+
+            modelBuilder.Entity<Sale>().Property(s => s.SalesData)
+                .HasConversion(
+                s => (string)JsonConvert.SerializeObject(s),
+                s => JsonConvert.DeserializeObject<List<SalesData>>(s));
+
+            modelBuilder.Entity<SalesPoint>().Property(p => p.ProvidedProducts)
+                .HasConversion(
+                s => (string)JsonConvert.SerializeObject(s),
+                s => JsonConvert.DeserializeObject<List<ProvidedProduct>>(s));
         }
 
         protected void SeedMockDb(SaleAPIDataContext context)
         {
             context.Buyers.AddRange(
-                 new Buyer() { Name = "Ivan Fedorov", SalesIds = new List<SaleIdE>() },
-                 new Buyer() { Name = "David Mahov", SalesIds = new List<SaleIdE>() },
-                 new Buyer() { Name = "Maria Lungina", SalesIds = new List<SaleIdE>() },
-                 new Buyer() { Name = "Lily Maksacova", SalesIds = new List<SaleIdE>()},
-                 new Buyer() { Name = "Rulon Oboev", SalesIds = new List<SaleIdE>()},
-                 new Buyer() { Name = "Armen Pashinyan", SalesIds = new List<SaleIdE>()},
-                 new Buyer() { Name = "Olga Smetanina", SalesIds = new List<SaleIdE>()},
-                 new Buyer() { Name = "Farida Aleshkova", SalesIds = new List<SaleIdE>()}
+                 new Buyer() { Name = "Ivan Fedorov", SalesIds = new List<int>() },
+                 new Buyer() { Name = "David Mahov", SalesIds = new List<int>() },
+                 new Buyer() { Name = "Maria Lungina", SalesIds = new List<int>() },
+                 new Buyer() { Name = "Lily Maksacova", SalesIds = new List<int>()},
+                 new Buyer() { Name = "Rulon Oboev", SalesIds = new List<int>()},
+                 new Buyer() { Name = "Armen Pashinyan", SalesIds = new List<int>()},
+                 new Buyer() { Name = "Olga Smetanina", SalesIds = new List<int>()},
+                 new Buyer() { Name = "Farida Aleshkova", SalesIds = new List<int>()}
                  );
 
             context.Products.AddRange(

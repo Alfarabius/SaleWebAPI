@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -12,7 +13,7 @@ namespace SaleAPI.Models
     public class Sale : EntityModel
     {
         [Required]
-        public DateTime Date { get; set; }
+        public string Date { get; set; }
 
         [Required]
         public string Time { get; set; }
@@ -23,10 +24,22 @@ namespace SaleAPI.Models
         [Required, AllowNull]
         public int? BuyerId { get; set; }
 
-        [Required, NotMapped]
-        public IEnumerable<SalesData> SalesData { get; set; }
+        [Required]
+        public ICollection<SalesData> SalesData { get; set; }
 
         [Required]
         public decimal TotalAmount { get; set; }
+    }
+
+    /// <summary>
+    /// Класс <c>SalesData</c> – Данные о количестве и общей цене купленных товаров одного вида.
+    /// </summary>
+    public class SalesData
+    {
+        public int ProductId { get; set; }
+
+        public decimal ProductQuantity { get; set; }
+
+        public decimal ProductIdAmount { get; set; }
     }
 }

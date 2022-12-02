@@ -10,7 +10,7 @@ using SaleAPI.DataAccess;
 namespace SaleAPI.Migrations
 {
     [DbContext(typeof(SaleAPIDataContext))]
-    [Migration("20221130155331_Initial")]
+    [Migration("20221202123751_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -30,6 +30,9 @@ namespace SaleAPI.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("SalesIds")
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
@@ -56,29 +59,6 @@ namespace SaleAPI.Migrations
                     b.ToTable("Products");
                 });
 
-            modelBuilder.Entity("SaleAPI.Models.ProvidedProduct", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .UseIdentityColumn();
-
-                    b.Property<int>("ProductId")
-                        .HasColumnType("int");
-
-                    b.Property<decimal>("ProductQuantity")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<int?>("SalesPointId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("SalesPointId");
-
-                    b.ToTable("ProvidedProduct");
-                });
-
             modelBuilder.Entity("SaleAPI.Models.Sale", b =>
                 {
                     b.Property<int>("Id")
@@ -90,8 +70,13 @@ namespace SaleAPI.Migrations
                         .IsRequired()
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("Date")
-                        .HasColumnType("datetime2");
+                    b.Property<string>("Date")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("SalesData")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("SalesPointId")
                         .HasColumnType("int");
@@ -108,26 +93,6 @@ namespace SaleAPI.Migrations
                     b.ToTable("Sales");
                 });
 
-            modelBuilder.Entity("SaleAPI.Models.SaleId", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .UseIdentityColumn();
-
-                    b.Property<int?>("BuyerId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("SalesIds")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("BuyerId");
-
-                    b.ToTable("SaleId");
-                });
-
             modelBuilder.Entity("SaleAPI.Models.SalesPoint", b =>
                 {
                     b.Property<int>("Id")
@@ -139,33 +104,13 @@ namespace SaleAPI.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("ProvidedProducts")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.HasKey("Id");
 
                     b.ToTable("SalesPoints");
-                });
-
-            modelBuilder.Entity("SaleAPI.Models.ProvidedProduct", b =>
-                {
-                    b.HasOne("SaleAPI.Models.SalesPoint", null)
-                        .WithMany("ProvidedProducts")
-                        .HasForeignKey("SalesPointId");
-                });
-
-            modelBuilder.Entity("SaleAPI.Models.SaleId", b =>
-                {
-                    b.HasOne("SaleAPI.Models.Buyer", null)
-                        .WithMany("SalesIds")
-                        .HasForeignKey("BuyerId");
-                });
-
-            modelBuilder.Entity("SaleAPI.Models.Buyer", b =>
-                {
-                    b.Navigation("SalesIds");
-                });
-
-            modelBuilder.Entity("SaleAPI.Models.SalesPoint", b =>
-                {
-                    b.Navigation("ProvidedProducts");
                 });
 #pragma warning restore 612, 618
         }
