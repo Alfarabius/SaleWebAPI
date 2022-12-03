@@ -17,8 +17,6 @@ namespace SaleAPI.DataAccess
 
         public SaleAPIDataContext(DbContextOptions<SaleAPIDataContext> options) : base(options) 
         {
-            //Database.EnsureDeleted();
-            //Database.Migrate(); // Database-update
             this.SeedMockDb(this);
         }
 

@@ -10,12 +10,6 @@ namespace SaleAPI.Models
     /// </summary>
     public class Buyer : NamedEntityModel
     {
-        [NotMapped]
         public ICollection<int> SalesIds { get; set; }
     }
-
-    //public class SaleIdE
-    //{
-    //    public int SaleId { get; set; }
-    //};
 }

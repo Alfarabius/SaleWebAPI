@@ -25,7 +25,7 @@ namespace SaleAPI.Controllers
         }
 
         [HttpGet]
-        [Route("GetBy{id}")]
+        [Route("GetBy/{id}")]
         public IActionResult GetEntityById(int id)
         {
 
@@ -49,15 +49,15 @@ namespace SaleAPI.Controllers
 
         [HttpPost]
         [Route("Create")]
-        public async Task<TEntity> AddEntity([FromBody] TEntity newEntity)
+        public async Task<IActionResult> AddEntity([FromBody] TEntity newEntity)
         {
             this.DbTable.Add(newEntity);
             await this.context.SaveChangesAsync();
-            return newEntity;
+            return Ok(newEntity);
         }
 
         [HttpDelete]
-        [Route("DeleteBy{id}")]
+        [Route("DeleteBy/{id}")]
         public async Task<IActionResult> DeleteEntityById(int id)
         {
             var Entity = this.EntityById(id);
@@ -73,21 +73,7 @@ namespace SaleAPI.Controllers
 
         }
 
-        [HttpPut]
-        [Route("UpdateBy{id}")]
-        public async Task<IActionResult> UpdateEntityById(int id, [FromBody] TEntity Entity)
-        {
-            var oldEntity = this.EntityById(id);
-
-            if (oldEntity == null)
-            {
-                return BadRequest($"{Name} {id} doesn't exist");
-            }
-
-            DbTable.Update(Entity);
-            await this.context.SaveChangesAsync();
-            return Ok(Entity);
-        }
+        public abstract Task<IActionResult> UpdateEntityById(int id, TEntity Entity);
 
         [ApiExplorerSettings(IgnoreApi = true)]
         public abstract TEntity EntityById(int id);
