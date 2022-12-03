@@ -94,6 +94,8 @@ namespace SaleAPI
             {
                 endpoints.MapControllers();
             });
+
+            ApiDbInitializer.Seed(app); // Seed Db while sturtup
         }
     }
 }

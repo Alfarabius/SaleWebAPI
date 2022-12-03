@@ -22,7 +22,7 @@ namespace SaleAPI.Handlers
         {
         }
 
-        protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
+        protected override async Task<AuthenticateResult> HandleAuthenticateAsync() // ToDo learn more about async problem
         {
             string userName = null;
             try
