@@ -4,7 +4,7 @@
 
 To statup project, edit:
 
-```
+```json
 "ConnectionStrings": {
     "DefaultConnection": "Server=(localdb)\\<YourLocalDb>;Database=SaleAPIDb,Trusted_Connection=True"
   }
