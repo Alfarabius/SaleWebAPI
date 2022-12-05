@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using BuyerAPI.Models;
+using BuyerAPI.HttpUtils;
+using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
@@ -18,6 +20,13 @@ namespace BuyerAPI.Controllers
     [ApiController]
     public class BuyingController : Controller
     {
+        private readonly HttpUtils.HttpUtils httpUtils;
+
+        public BuyingController(HttpUtils.HttpUtils httpUtils)
+        {
+            this.httpUtils = httpUtils;
+        }
+
         [HttpPost("[action]inSalePointProduct")]
         public IActionResult Buy(
             [FromQuery] int BuyerId,
@@ -29,7 +38,9 @@ namespace BuyerAPI.Controllers
                 httpClient.DefaultRequestHeaders.Authorization = 
                     new AuthenticationHeaderValue(Config.type, Config.key);
 
-                var getSalesPointResponse = HttpRequest(
+                // Get SalesPoint
+                
+                var getSalesPointResponse = httpUtils.HttpRequest(
                 httpClient,
                 Config.saleApiURL + Config.salesPoints + Config.getBy + salesPointId.ToString(),
                 new Dictionary<string, string>() { },
@@ -42,7 +53,9 @@ namespace BuyerAPI.Controllers
 
                 var salesPoint = JsonConvert.DeserializeObject<SalesPoint>(salesPointString);
 
-                Dictionary<int, decimal> totalPrices = new Dictionary<int, decimal>();
+                Dictionary<int, decimal> totalPrices = new Dictionary<int, decimal>(); // Dict for SalesData list
+                
+                // Check required products in this SalesPoint
                 
                 foreach (var product in products)
                 {
@@ -52,7 +65,9 @@ namespace BuyerAPI.Controllers
                     if (providedProduct == null)
                         return NotFound($"Product - {product.Key} did not found in the {salesPoint.Name}");
 
-                    var getProductResponse = HttpRequest(
+                    // Get current product price
+
+                    var getProductResponse = httpUtils.HttpRequest(
                         httpClient,
                         Config.saleApiURL + Config.products + Config.getBy + providedProduct.ProductId,
                         new Dictionary<string, string>(),
@@ -64,7 +79,11 @@ namespace BuyerAPI.Controllers
 
                     var productObj = JsonConvert.DeserializeObject<Product>(getProductResponse.ResponseData);
 
+                    // Create total prices for SalesData list
+
                     totalPrices.Add(productObj.Id, productObj.Price * product.Value);
+
+                    // Change product quanity in SalesPoint Model
 
                     if (product.Value <= providedProduct.ProductQuantity)
                         providedProduct.ProductQuantity -= product.Value;
@@ -74,7 +93,9 @@ namespace BuyerAPI.Controllers
 
                 var json = JsonConvert.SerializeObject(salesPoint);
                 
-                var putSalesPointResponse = PutRequest(
+                // Update SalesPoint Entity by SalesPoint model
+
+                var putSalesPointResponse = httpUtils.PutRequest(
                     httpClient,
                     Config.saleApiURL + Config.salesPoints + Config.updateBy + salesPointId.ToString(),
                     salesPoint
@@ -83,6 +104,8 @@ namespace BuyerAPI.Controllers
                 if (putSalesPointResponse.StatusCode != HttpStatusCode.OK)
                     return BadRequest($"Failure update {salesPoint.Name}");
 
+                // Fill SalesData list
+                
                 List<SalesData> salesDataLst = new List<SalesData>();
 
                 foreach (var product in products)
@@ -98,6 +121,8 @@ namespace BuyerAPI.Controllers
                     });
                 }
 
+                // Create Sale model
+
                 var Sale = new Sale()
                 {
                     Id = 0,
@@ -109,7 +134,9 @@ namespace BuyerAPI.Controllers
                     TotalAmount = totalPrices.Values.Sum()
                 };
 
-                var saleCreationResponse = PostRequest(
+                // Create Sale Entity
+
+                var saleCreationResponse = httpUtils.PostRequest(
                     httpClient,
                     Config.saleApiURL + Config.sales + Config.create,
                     Sale
@@ -118,10 +145,14 @@ namespace BuyerAPI.Controllers
                 if (saleCreationResponse.StatusCode != HttpStatusCode.OK)
                     return BadRequest("Sale instanse did not created" + saleCreationResponse.ResponseData);
 
+                // Check Buyer are authorized
+                
                 if (BuyerId == 0)
                     return Ok("Succsess");
 
-                var getBuyerResponse = HttpRequest(
+                // Get Buyer
+
+                var getBuyerResponse = httpUtils.HttpRequest(
                     httpClient,
                     Config.saleApiURL + Config.buyers + Config.getBy + BuyerId.ToString(),
                     new Dictionary<string, string>(),
@@ -134,9 +165,13 @@ namespace BuyerAPI.Controllers
                 var buyer = JsonConvert.DeserializeObject<Buyer>(getBuyerResponse.ResponseData);
                 var sale = JsonConvert.DeserializeObject<Sale>(saleCreationResponse.ResponseData);
 
+                // Create SalesId to Buyer model
+
                 buyer.SalesIds.Add(sale.Id);
 
-                var updateBuyerResponse = PutRequest(
+                // Update Buyer entity
+
+                var updateBuyerResponse = httpUtils.PutRequest(
                     httpClient,
                     Config.saleApiURL + Config.buyers + Config.updateBy + BuyerId.ToString(),
                     buyer
@@ -147,188 +182,6 @@ namespace BuyerAPI.Controllers
 
             return Ok("Succsess");
             }                   
-        }
-
-        private async Task<ResponseViewModel> HttpRequest(
-            HttpClient httpClient,
-            string uri, 
-            Dictionary<string, string> Parameters, 
-            HttpMethod Method) 
-        {            
-            try
-            {
-                Uri _uri = new Uri(uri);
-                FormUrlEncodedContent content = new FormUrlEncodedContent(Parameters);                
-
-                using (var requestMessage = new HttpRequestMessage(Method, _uri))
-                {
-                    requestMessage.Content = content;
-                    
-
-                    using (var response = httpClient.SendAsync(requestMessage).GetAwaiter().GetResult()) 
-                    {
-                        var status = response.StatusCode;
-                        var responseString = await response.Content.ReadAsStringAsync();
-                        
-                        var goodResponse = new ResponseViewModel();
-                        goodResponse.StatusCode = status;
-                        goodResponse.ResponseData = responseString;
-                        
-                        return goodResponse;
-                    }                    
-                }
-            }
-            catch (Exception ex) 
-            {
-                var badResponse = new ResponseViewModel();
-                badResponse.ResponseData = $"Error - {ex.Message}";
-                badResponse.StatusCode = HttpStatusCode.InternalServerError;
-
-                return badResponse; 
-            }
-        }
-
-        private async Task<ResponseViewModel> PutRequest(HttpClient httpClient, string uri, object body)
-        {
-            try
-            {
-                Uri _uri = new Uri(uri);
-                using (var response = httpClient.PutAsJsonAsync(_uri, body).GetAwaiter().GetResult())
-                {
-                    var status = response.StatusCode;
-                    var responseString = await response.Content.ReadAsStringAsync();
-
-                    var goodResponse = new ResponseViewModel();
-                    goodResponse.StatusCode = status;
-                    goodResponse.ResponseData = responseString;
-
-                    return goodResponse;
-                }
-
-            }
-            catch (Exception ex)
-            {
-                var badResponse = new ResponseViewModel();
-                badResponse.ResponseData = $"Error - {ex.Message}";
-                badResponse.StatusCode = HttpStatusCode.InternalServerError;
-
-                return badResponse;
-            }
-        }
-
-        private async Task<ResponseViewModel> PostRequest(HttpClient httpClient, string uri, object body)
-        {
-            try
-            {
-                Uri _uri = new Uri(uri);
-                using (var response = httpClient.PostAsJsonAsync(_uri, body).GetAwaiter().GetResult())
-                {
-                    var status = response.StatusCode;
-                    var responseString = await response.Content.ReadAsStringAsync();
-
-                    var goodResponse = new ResponseViewModel();
-                    goodResponse.StatusCode = status;
-                    goodResponse.ResponseData = responseString;
-
-                    return goodResponse;
-                }
-            }
-            catch (Exception ex)
-            {
-                var badResponse = new ResponseViewModel();
-                badResponse.ResponseData = $"Error - {ex.Message}";
-                badResponse.StatusCode = HttpStatusCode.InternalServerError;
-
-                return badResponse;
-            }
-        }
-    }
-
-    public class ResponseViewModel
-    {
-        public string ResponseData { get; set; }
-
-        public HttpStatusCode StatusCode { get; set; }
-    }
-
-    public partial class Sale 
-    {
-        [JsonProperty("id")]
-        public int Id { get; set; }
-
-        [JsonProperty("date")]
-        public string Date { get; set; }
-
-        [JsonProperty("time")]
-        public string Time { get; set; }
-
-        [JsonProperty("salesPointId")]
-        public int SalesPointId { get; set; }
-
-        [JsonProperty("buyerId")]
-        public int BuyerId { get; set; }
-
-        [JsonProperty("salesData")]
-        public List<SalesData> SalesData { get; set; }
-
-        [JsonProperty("totalAmount")]
-        public decimal TotalAmount { get; set; }
-    }
-
-    public partial class SalesData
-    {
-        [JsonProperty("productId")]
-        public int ProductId { get; set; }
-
-        [JsonProperty("productQuantity")]
-        public int ProductQuantity { get; set; }
-
-        [JsonProperty("productIdAmount")]
-        public decimal ProductIdAmount { get; set; }
-    }
-
-    public partial class SalesPoint
-    {
-        [JsonProperty("providedProducts")]
-        public List<ProvidedProduct> ProvidedProducts { get; set; }
-
-        [JsonProperty("name")]
-        public string Name { get; set; }
-
-        [JsonProperty("id")]
-        public int Id { get; set; }
-    }
-
-    public partial class ProvidedProduct
-    {
-        [JsonProperty("productId")]
-        public int ProductId { get; set; }
-
-        [JsonProperty("productQuantity")]
-        public int ProductQuantity { get; set; }
-    }
-
-    public partial class Product
-    {
-        [JsonProperty("price")]
-        public decimal Price { get; set; }
-
-        [JsonProperty("name")]
-        public string Name { get; set; }
-
-        [JsonProperty("id")]
-        public int Id { get; set; }
-    }
-
-    public partial class Buyer
-    {
-        [JsonProperty("salesIds")]
-        public List<int> SalesIds { get; set; }
-
-        [JsonProperty("name")]
-        public string Name { get; set; }
-
-        [JsonProperty("id")]
-        public int Id { get; set; }
+        }        
     }
 }
