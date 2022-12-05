@@ -8,7 +8,6 @@ using System.Threading.Tasks;
 
 namespace SaleAPI.Controllers
 {
-    [Authorize]
     public class BuyersController : BaseApiController<Buyer>
     {
         protected override DbSet<Buyer> DbTable => base.context.Buyers;

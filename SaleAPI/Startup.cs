@@ -38,7 +38,11 @@ namespace SaleAPI
             services.AddControllers();
             services.AddSwaggerGen(opt =>
             {
-                opt.SwaggerDoc("v1", new OpenApiInfo { Title = "SaleAPI", Version = "v1" });
+                opt.SwaggerDoc("v1", new OpenApiInfo { 
+                    Title = "SaleAPI",
+                    Version = "v1", 
+                    Description = "SaleAPI for e-commerce trading place" 
+                });
 
                 opt.AddSecurityDefinition("basic", new OpenApiSecurityScheme
                 {
