@@ -21,13 +21,13 @@ namespace SaleAPI.Controllers
         }
 
         [HttpPut]
-        [Route("UpdateBy{id}")]
+        [Route("UpdateBy/{id}")]
         public override async Task<IActionResult> UpdateEntityById(int id, [FromBody] Product Entity)
         {
             var oldProduct = this.EntityById(id);
 
             if (oldProduct == null)
-                return BadRequest($"{Name} {id} doesn't exist");
+                return NotFound($"{Name} {id} doesn't exist");
 
             oldProduct.Name = Entity.Name;
             oldProduct.Price = Entity.Price;

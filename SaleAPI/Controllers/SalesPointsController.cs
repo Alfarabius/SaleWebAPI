@@ -22,7 +22,7 @@ namespace SaleAPI.Controllers
             var oldSalesPoint = this.EntityById(id);
 
             if (oldSalesPoint == null)
-                return BadRequest($"{Name} {id} doesn't exist");
+                return NotFound($"{Name} {id} doesn't exist");
 
             oldSalesPoint.Name = Entity.Name;
             oldSalesPoint.ProvidedProducts = Entity.ProvidedProducts;

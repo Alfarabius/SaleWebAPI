@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SaleAPI.DataAccess;
 using SaleAPI.Models;
@@ -7,6 +8,7 @@ using System.Threading.Tasks;
 
 namespace SaleAPI.Controllers
 {
+    [Authorize]
     public class SalesController : BaseApiController<Sale>
     {
         protected override DbSet<Sale> DbTable => base.context.Sales;
@@ -16,13 +18,13 @@ namespace SaleAPI.Controllers
         public SalesController(SaleAPIDataContext context) : base(context) { }
 
         [HttpPut]
-        [Route("UpdateBy{id}")]
+        [Route("UpdateBy/{id}")]
         public override async Task<IActionResult> UpdateEntityById(int id, [FromBody] Sale Entity)
         {
             var oldSale = this.EntityById(id);
 
             if (oldSale == null)
-                return BadRequest($"{Name} {id} doesn't exist");
+                return NotFound($"{Name} {id} doesn't exist");
             
             oldSale.SalesData = Entity.SalesData;
             oldSale.Date = Entity.Date;

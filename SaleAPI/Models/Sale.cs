@@ -28,6 +28,7 @@ namespace SaleAPI.Models
         public ICollection<SalesData> SalesData { get; set; }
 
         [Required]
+        [Column(TypeName = "decimal(20,2)")]
         public decimal TotalAmount { get; set; }
     }
 
@@ -38,7 +39,7 @@ namespace SaleAPI.Models
     {
         public int ProductId { get; set; }
 
-        public decimal ProductQuantity { get; set; }
+        public int ProductQuantity { get; set; }
 
         public decimal ProductIdAmount { get; set; }
     }

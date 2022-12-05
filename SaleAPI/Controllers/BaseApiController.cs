@@ -3,14 +3,16 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SaleAPI.DataAccess;
 using SaleAPI.Models;
+using System;
 using System.Linq;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace SaleAPI.Controllers
 {
     [Route("SaleAPI/[controller]")]
     [ApiController]
-    [Authorize]
     public abstract class BaseApiController<TEntity> : Controller where TEntity : class
     {
         protected abstract DbSet<TEntity> DbTable { get; }
@@ -48,15 +50,25 @@ namespace SaleAPI.Controllers
         }
 
         [HttpPost]
+        [Authorize]
         [Route("Create")]
         public async Task<IActionResult> AddEntity([FromBody] TEntity newEntity)
         {
-            this.DbTable.Add(newEntity);
-            await this.context.SaveChangesAsync();
-            return Ok(newEntity);
+            try
+            {
+                this.DbTable.Add(newEntity);
+                await this.context.SaveChangesAsync();
+                return Ok(newEntity);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            
         }
 
         [HttpDelete]
+        [Authorize]
         [Route("DeleteBy/{id}")]
         public async Task<IActionResult> DeleteEntityById(int id)
         {
@@ -64,15 +76,16 @@ namespace SaleAPI.Controllers
 
             if (Entity == null)
             {
-                return BadRequest($"{Name} {id} doesn't exist");
+                return NotFound($"{Name} {id} doesn't exist");
             }
 
             DbTable.Remove(Entity);
             await this.context.SaveChangesAsync();
-            return Ok(Entity);
+            return Ok("Succsess");
 
         }
 
+        [Authorize]
         public abstract Task<IActionResult> UpdateEntityById(int id, TEntity Entity);
 
         [ApiExplorerSettings(IgnoreApi = true)]
