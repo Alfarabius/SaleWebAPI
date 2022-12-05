@@ -3,7 +3,14 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.4.33110.190
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SaleAPI", "SaleAPI\SaleAPI.csproj", "{674D02DE-9008-4BD8-BDE4-870B9AE909B9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SaleAPI", "SaleAPI\SaleAPI.csproj", "{674D02DE-9008-4BD8-BDE4-870B9AE909B9}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{1D6449C5-BA46-413C-9C90-ECB70405FC48}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BuyerAPI", "BuyerAPI\BuyerAPI.csproj", "{303C01E2-8200-46E1-BBE1-A7A39EDB4D8B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +22,10 @@ Global
 		{674D02DE-9008-4BD8-BDE4-870B9AE909B9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{674D02DE-9008-4BD8-BDE4-870B9AE909B9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{674D02DE-9008-4BD8-BDE4-870B9AE909B9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{303C01E2-8200-46E1-BBE1-A7A39EDB4D8B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{303C01E2-8200-46E1-BBE1-A7A39EDB4D8B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{303C01E2-8200-46E1-BBE1-A7A39EDB4D8B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{303C01E2-8200-46E1-BBE1-A7A39EDB4D8B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

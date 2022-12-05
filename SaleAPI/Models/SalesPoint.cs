@@ -1,15 +1,22 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SaleAPI.Models
 {
     /// <summary>
     /// Класс <c>SalesPoint</c> – точка продажи товаров.
     /// </summary>
-    public class SalesPoint
+    public class SalesPoint : NamedEntityModel
     {
-        public int Id { get; set; }
+        [Required]        
+        public ICollection<ProvidedProduct> ProvidedProducts { get; set; }
+    }
 
-        [Required]
-        public string Name { get; set; }
+    public class ProvidedProduct
+    {
+        public int ProductId { get; set; }
+
+        public int ProductQuantity { get; set; }
     }
 }
