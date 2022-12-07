@@ -24,7 +24,7 @@ The Swagger UI is an open source project to visually render documentation for an
 ### SaleAPI - web API with CRUD operations:
 - https://localhost:5001/swagger/index.html
     
-    - Authorization:
+    Authorization:
     - Username: Admin
     - Password: Admin
 
