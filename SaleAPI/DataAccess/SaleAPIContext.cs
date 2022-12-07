@@ -33,6 +33,8 @@ namespace SaleAPI.DataAccess
                 .HasConversion(
                 s => (string)JsonConvert.SerializeObject(s),
                 s => JsonConvert.DeserializeObject<List<ProvidedProduct>>(s));
+
+            modelBuilder.Entity<Sale>().Property(s => s.BuyerId).IsRequired(false);
         }        
     }
 }

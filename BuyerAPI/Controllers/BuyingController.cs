@@ -13,6 +13,7 @@ using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
 using System.Threading.Tasks;
+using System.Diagnostics.CodeAnalysis;
 
 namespace BuyerAPI.Controllers
 {
@@ -118,8 +119,8 @@ namespace BuyerAPI.Controllers
                     Id = 0,
                     Date = DateTime.Now.ToShortDateString(),
                     Time = DateTime.Now.ToString("HH:mm"),
-                    SalesPointId = salesPointId,
                     BuyerId = BuyerId,
+                    SalesPointId = salesPointId,                    
                     SalesData = salesDataLst,
                     TotalAmount = totalPrices.Values.Sum()
                 };
@@ -216,7 +217,6 @@ namespace BuyerAPI.Controllers
                     salesPoint
                     );
             }
-
         }
     }
 }
