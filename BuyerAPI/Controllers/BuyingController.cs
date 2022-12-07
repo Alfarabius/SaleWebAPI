@@ -16,7 +16,7 @@ using System.Threading.Tasks;
 
 namespace BuyerAPI.Controllers
 {
-    [Route("BuyAPI/[controller]")]
+    [Route("BuyerAPI/[controller]")]
     [ApiController]
     public class BuyingController : Controller
     {
@@ -28,7 +28,7 @@ namespace BuyerAPI.Controllers
         }
 
         [HttpPost("[action]")]
-        public IActionResult Sale(
+        public IActionResult Buy(
             [FromQuery] int BuyerId,
             [FromQuery, Required] int salesPointId,
             [FromBody, Required] Dictionary<string, int> products)
