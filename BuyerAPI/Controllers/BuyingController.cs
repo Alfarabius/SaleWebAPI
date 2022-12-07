@@ -27,12 +27,15 @@ namespace BuyerAPI.Controllers
             this.httpUtils = httpUtils;
         }
 
-        [HttpPost("[action]inSalePointProduct")]
-        public IActionResult Buy(
+        [HttpPost("[action]")]
+        public IActionResult Sale(
             [FromQuery] int BuyerId,
             [FromQuery, Required] int salesPointId,
             [FromBody, Required] Dictionary<string, int> products)
         {
+            if (products.Values.Any(p => p < 0) || products.Values.All(p => p == 0))
+                return BadRequest("product quntity problem");
+
             using (var httpClient = new HttpClient())
             {
                 httpClient.DefaultRequestHeaders.Authorization = 
@@ -46,17 +49,17 @@ namespace BuyerAPI.Controllers
                 new Dictionary<string, string>() { },
                 HttpMethod.Get).Result;
 
-                var salesPointString = getSalesPointResponse.ResponseData;
-
                 if (getSalesPointResponse.StatusCode != HttpStatusCode.OK)
-                    return NotFound(salesPointString);
+                    return NotFound(getSalesPointResponse.ResponseData);
 
-                var salesPoint = JsonConvert.DeserializeObject<SalesPoint>(salesPointString);
+                // Deserialize to SalesPoint Model
 
-                Dictionary<int, decimal> totalPrices = new Dictionary<int, decimal>(); // Dict for SalesData list
+                var salesPoint = JsonConvert.DeserializeObject<SalesPoint>(getSalesPointResponse.ResponseData);
                 
                 // Check required products in this SalesPoint
-                
+
+                Dictionary<int, decimal> totalPrices = new Dictionary<int, decimal>(); // Dict for SalesData list
+
                 foreach (var product in products)
                 {
                     var providedProduct = salesPoint.ProvidedProducts
@@ -79,30 +82,17 @@ namespace BuyerAPI.Controllers
 
                     var productObj = JsonConvert.DeserializeObject<Product>(getProductResponse.ResponseData);
 
-                    // Create total prices for SalesData list
+                    // Add total in totalPrices dictionary <productId, total> for SalesData list
 
                     totalPrices.Add(productObj.Id, productObj.Price * product.Value);
 
-                    // Change product quanity in SalesPoint Model
+                    // Check quantity of products in SalesPoint and change product quantity in SalesPoint Model
 
                     if (product.Value <= providedProduct.ProductQuantity)
                         providedProduct.ProductQuantity -= product.Value;
                     else
                         return BadRequest($"Not enought {product.Key} in the {salesPoint.Name}");
                 }
-
-                var json = JsonConvert.SerializeObject(salesPoint);
-                
-                // Update SalesPoint Entity by SalesPoint model
-
-                var putSalesPointResponse = httpUtils.PutRequest(
-                    httpClient,
-                    Config.saleApiURL + Config.salesPoints + Config.updateBy + salesPointId.ToString(),
-                    salesPoint
-                    ).Result;
-
-                if (putSalesPointResponse.StatusCode != HttpStatusCode.OK)
-                    return BadRequest($"Failure update {salesPoint.Name}");
 
                 // Fill SalesData list
                 
@@ -134,7 +124,7 @@ namespace BuyerAPI.Controllers
                     TotalAmount = totalPrices.Values.Sum()
                 };
 
-                // Create Sale Entity
+                // Create Sale Entity !!!!(1)!!!!
 
                 var saleCreationResponse = httpUtils.PostRequest(
                     httpClient,
@@ -145,8 +135,26 @@ namespace BuyerAPI.Controllers
                 if (saleCreationResponse.StatusCode != HttpStatusCode.OK)
                     return BadRequest("Sale instanse did not created" + saleCreationResponse.ResponseData);
 
+                var saleFromDb = JsonConvert.DeserializeObject<Sale>(saleCreationResponse.ResponseData);
+
+                // Update SalesPoint Entity by SalesPoint model !!!!(2)!!!!
+
+                var json = JsonConvert.SerializeObject(salesPoint);
+
+                var putSalesPointResponse = httpUtils.PutRequest(
+                    httpClient,
+                    Config.saleApiURL + Config.salesPoints + Config.updateBy + salesPointId.ToString(),
+                    salesPoint
+                    ).Result;
+
+                if (putSalesPointResponse.StatusCode != HttpStatusCode.OK)
+                {
+                    Rollback(1, saleFromDb.Id, salesPoint, httpClient);
+                    return BadRequest($"Failure update {salesPoint.Name}");
+                }                    
+
                 // Check Buyer are authorized
-                
+
                 if (BuyerId == 0)
                     return Ok("Succsess");
 
@@ -159,17 +167,21 @@ namespace BuyerAPI.Controllers
                     HttpMethod.Get
                     ).Result;
 
+                var oldSalesPoint = JsonConvert.DeserializeObject<SalesPoint>(getSalesPointResponse.ResponseData);
+
                 if (getBuyerResponse.StatusCode != HttpStatusCode.OK)
+                {                    
+                    Rollback(2, saleFromDb.Id, oldSalesPoint, httpClient);
                     return BadRequest(getBuyerResponse.ResponseData);
+                }
 
-                var buyer = JsonConvert.DeserializeObject<Buyer>(getBuyerResponse.ResponseData);
-                var sale = JsonConvert.DeserializeObject<Sale>(saleCreationResponse.ResponseData);
+                var buyer = JsonConvert.DeserializeObject<Buyer>(getBuyerResponse.ResponseData);                
 
-                // Create SalesId to Buyer model
+                // Add SalesId to Buyer model
 
-                buyer.SalesIds.Add(sale.Id);
+                buyer.SalesIds.Add(saleFromDb.Id);
 
-                // Update Buyer entity
+                // Update Buyer entity !!!!(3)!!!!
 
                 var updateBuyerResponse = httpUtils.PutRequest(
                     httpClient,
@@ -178,10 +190,33 @@ namespace BuyerAPI.Controllers
                     ).Result;
 
                 if (updateBuyerResponse.StatusCode != HttpStatusCode.OK)
+                {
+                    Rollback(2, saleFromDb.Id, oldSalesPoint, httpClient);
                     return BadRequest(updateBuyerResponse.ResponseData);
+                }
 
             return Ok("Succsess");
             }                   
-        }        
+        }
+        
+        private async void Rollback(int step, int saleId, SalesPoint salesPoint, HttpClient httpClient)
+        {
+            await httpUtils.HttpRequest(
+                httpClient,
+                Config.saleApiURL + Config.sales + Config.deleteBy + saleId.ToString(),
+                new Dictionary<string, string>(),
+                HttpMethod.Delete
+                ); 
+            
+            if (step == 2) 
+            {
+                await httpUtils.PutRequest(
+                    httpClient,
+                    Config.saleApiURL + Config.salesPoints + Config.updateBy + salesPoint.Id.ToString(),
+                    salesPoint
+                    );
+            }
+
+        }
     }
 }
