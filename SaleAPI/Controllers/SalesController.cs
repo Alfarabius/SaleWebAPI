@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SaleAPI.DataAccess;
 using SaleAPI.Models;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -34,6 +36,28 @@ namespace SaleAPI.Controllers
 
             await this.context.SaveChangesAsync();
             return Ok(oldSale);
+        }
+
+        [HttpPost]
+        [Route("Create")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public override async Task<IActionResult> AddEntity([FromBody] Sale newEntity) 
+        {
+            try
+            {
+                if (newEntity.BuyerId == 0)
+                    newEntity.BuyerId = null;
+
+                this.DbTable.Add(newEntity);
+                await this.context.SaveChangesAsync();
+                return Ok(newEntity);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         public override Sale EntityById(int id)

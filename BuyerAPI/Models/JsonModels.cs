@@ -18,7 +18,7 @@ namespace BuyerAPI.Models
         public int SalesPointId { get; set; }
 
         [JsonProperty("buyerId")]
-        public int BuyerId { get; set; }
+        public int? BuyerId { get; set; }
 
         [JsonProperty("salesData")]
         public List<SalesData> SalesData { get; set; }

@@ -10,7 +10,7 @@ using SaleAPI.DataAccess;
 namespace SaleAPI.Migrations
 {
     [DbContext(typeof(SaleAPIDataContext))]
-    [Migration("20221202123751_Initial")]
+    [Migration("20221207222527_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -52,7 +52,7 @@ namespace SaleAPI.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("Price")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(20,2)");
 
                     b.HasKey("Id");
 
@@ -86,7 +86,7 @@ namespace SaleAPI.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("TotalAmount")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(20,2)");
 
                     b.HasKey("Id");
 
