@@ -17,14 +17,12 @@ For your local bases names use in terminal:
 
 After that use ``Update-Database`` in Package Manager Console, than build and start SaleAPI and BuyerAPI.
 
-## Services
-
 ### Swagger UI
 
 The Swagger UI is an open source project to visually render documentation for an API defined with the OpenAPI (Swagger) Specification
 
-# SaleAPI - web API with CRUD operations:
+## SaleAPI - web API with CRUD operations:
 - https://localhost:5001/swagger/index.html
 
-# BuyerAPI - API with Sale buisness logic:
+## BuyerAPI - API with Sale buisness logic:
 - http://localhost:5003/swagger/index.html
